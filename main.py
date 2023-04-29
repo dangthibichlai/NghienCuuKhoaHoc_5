@@ -18,10 +18,10 @@ data = dataset.dropna(subset=['ca','thal'])
 print(data.info())
 
 # đã drop dòng dữ liệu missing
+# Export du lieu ra file csv
 
 # 0 là không bị bệnh tim, 1234 là bị bệnh tim
 data['num'] = data['num'].apply(lambda x: 0 if x == 0 else 1)
-
 # xem dữ liệu biểu đồ
 # set cột y chỉ chứa giá trị nguyên
 # suwr dungj plt để vẽ biểu đồ cho chol, thalach,oldpeak
@@ -42,7 +42,6 @@ data['num'] = data['num'].apply(lambda x: 0 if x == 0 else 1)
 
 # thuật toán KNN
 # chia dữ liệu thành 2 phần train và test
-
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(data.drop(['num'], axis=1), data['num'], test_size=0.25, random_state=0)
 # StandardScaler
@@ -63,20 +62,20 @@ X_test = st_x.transform(X_test)
 
 # thuật toán KNN
 # Chọn số K  tốt nhất
-from sklearn.model_selection import cross_val_score
-k_range = range(1, 31)
-k_scores = []
-for k in k_range:
-    knn = KNeighborsClassifier(n_neighbors=k)
-    scores = cross_val_score(knn, X_train, y_train, cv=10, scoring='accuracy')
-    k_scores.append(scores.mean())
-
-plt.plot(k_range, k_scores)
-plt.xlabel('Value of K for KNN')
-plt.ylabel('Cross-Validated Accuracy')
+error = []
+for i in range(1, 10):
+    knn = KNeighborsClassifier(n_neighbors=i)
+    knn.fit(X_train, y_train)
+    pred_i = knn.predict(X_test)
+    error.append(np.mean(pred_i != y_test))
+plt.figure(figsize=(10, 10))
+plt.plot(range(1, 10), error, color='red', linestyle='dashed', marker='o',
+             markerfacecolor='blue', markersize=10)
+plt.title('Error Rate K Value')
+plt.xlabel('K Value')
+plt.ylabel('Mean Error')
 plt.show()
-#in ra số k tốt nhất
-print(k_scores.index(max(k_scores))+1)
+
 
 
 
@@ -96,17 +95,27 @@ print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 print(accuracy_score(y_test, y_pred))
 
-# Decision Tree
+#
+# navie bayes
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+gnb.fit(X_train, y_train)
+y_pred = gnb.predict(X_test)
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+print(accuracy_score(y_test, y_pred))
+
+# decision tree
 from sklearn.tree import DecisionTreeClassifier
-dtc = DecisionTreeClassifier(criterion='entropy', random_state=0)
+dtc = DecisionTreeClassifier()
 dtc.fit(X_train, y_train)
 y_pred = dtc.predict(X_test)
 print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 print(accuracy_score(y_test, y_pred))
 
-# Random Forest
-from sklearn.ensemble import RandomForestClassifier
+
+
 
 
 
